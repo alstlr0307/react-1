@@ -1,5 +1,200 @@
 # 202130104 김민식
 
+# 3월 27일 강의내용
+
+# 📌 React의 개발흐름 이해와 전체 개념정리  
+<h1>🗓 **2025-03-27 / 4번째 수업**</h1>
+
+## 🧩 Component의 생성과 중첩(Nesting)
+
+### ✅ Component란?
+1. `component`는 고유한 **로직과 모양을 가진 UI의 일부**입니다.  
+2. 버튼처럼 **작은 단위부터**, 전체 페이지처럼 **큰 단위까지** 구성할 수 있습니다.  
+3. `component`는 **마크업을 반환하는 JavaScript 함수**입니다.  
+
+---
+
+### ✅ Nesting이란?
+- Nesting은 **하나의 component 안에 다른 component를 포함하는 구조**입니다.  
+- CSS 선택자의 중첩 구조와 비슷하게 이해하면 쉽습니다.  
+
+📌 참고: CSS는 **2023년부터 중첩(Nesting)을 자체 지원**하며,  
+이전에는 **Sass, Less 등의 전처리기**를 통해 사용하던 기능입니다.  
+
+---
+
+## 🛠 실습: MyApp Component 만들기
+
+### ✅ 실습 목표
+- `MyApp`이라는 함수형 component를 생성합니다.  
+- 어떤 디렉토리에 파일을 만들지, 함수는 어떤 방식으로 구성할지 생각해봅니다.  
+
+### ✅ 예시 구성
+
+```jsx
+
+function MyApp() {
+  return (
+    <div>
+      <h1>Welcome to MyApp!</h1>
+    </div>
+  );
+}
+
+export default MyApp;
+```
+
+- 📁 **디렉토리**: `src/components/`  
+- 📄 **파일 이름**: `MyApp.js`  
+- 🧱 **component 구조**: 함수형 component, JSX 반환  
+
+---
+
+## 📦 `export default`와 `export`의 차이
+
+React에서 component를 내보내기(export) 위한 **JavaScript 문법**입니다.  
+좀 더 자세한 내용은 [MDN](https://developer.mozilla.org/ko/) 또는 [javascript.info](https://javascript.info/)에서 확인할 수 있습니다.
+
+---
+
+### ✅ 1. Named Export
+
+- 하나의 파일에 **여러 개의 component를 정의**할 때 사용합니다.
+- component를 사용하는 쪽에서는 **정확한 이름을 반드시 명시**해야 합니다.
+
+```jsx
+
+export function sayHello() {
+  console.log("Hello!");
+}
+```
+
+```jsx
+
+import { sayHello } from './utils';
+```
+
+---
+
+### ✅ 2. Default Export
+
+- 파일당 **하나의 대표 component만 내보낼 때** 사용합니다.  
+- 사용하는 쪽에서는 **이름을 자유롭게 지정**할 수 있습니다.
+
+```jsx
+// MyApp.js
+export default function MyApp() {
+  return <h1>Hello!</h1>;
+}
+```
+
+```jsx
+
+import MyApp from './MyApp'; 
+```
+
+---
+
+## 🎯 결론
+
+✔ `component`는 UI의 작은 조각으로, 중첩하여 화면을 구성할 수 있습니다.  
+✔ `export default`와 `export`는 component를 다른 파일에서 사용할 수 있도록 내보내는 방식입니다.  
+✔ Named Export는 **여러 개의 export에 적합**, Default Export는 **대표 component에 적합**합니다.  
+✔ 실습을 통해 `MyApp` component를 만들어보고 직접 nesting 구조도 경험해보세요! 🚀
+
+## 💡 JSX로 마크업 작성하기
+
+- 위에서 작성한 코드의 마크업 문법을 **JSX**라고 합니다.
+- **반드시 사용하는 것은 아니지만**, React 프로젝트에서는 **편의성 때문에 JSX를 주로 사용**합니다.
+- JSX는 HTML보다 **더 엄격한 문법**을 따릅니다.  
+  예: `<br>` 같은 싱글 태그도 **반드시 닫아야 함** → `<br />`
+- React에서는 여러 개의 component를 JSX 태그로 반환할 수 있습니다.  
+  다만 **반드시 하나의 부모 요소로 감싸야 합니다**.
+  - `<div>`, `<section>` 또는 `<>...</>`와 같은 **Fragment**를 사용합니다.
+
+---
+
+## 🧪 예: AboutPage Component를 작성했다면?
+
+- 이 component를 화면에서 확인하려면 **`App.js`에서 불러와야 합니다.**
+
+```jsx
+// App.js
+import AboutPage from './AboutPage';
+
+function App() {
+  return (
+    <div>
+      <AboutPage />
+    </div>
+  );
+}
+```
+
+
+
+---
+
+## 🎨 스타일 추가하기
+
+- React에서는 CSS 클래스명을 지정할 때 `class`가 아닌 **`className`**을 사용합니다.
+
+```jsx
+<div className="avatar">내용</div>
+```
+
+- `className`은 HTML의 `class` 속성과 동일한 방식으로 동작합니다.
+- CSS 규칙은 **별도의 CSS 파일**에 작성하며, React는 CSS를 적용하는 방식에 제한을 두지 않습니다.  
+  → **정적 웹사이트에서 사용하는 방식 그대로 사용 가능**
+
+---
+
+### 📎 CSS 추가 방법
+
+#### ❌ (비추천) `<link>` 태그 사용
+
+- HTML의 `<head>`에 `<link>`를 직접 추가하는 방법도 있지만,  
+  정적 HTML 파일을 수정해야 하므로 React 프로젝트에서는 잘 사용하지 않습니다.
+
+#### ✅ (권장) CSS 파일 import
+
+- `App.css` 같은 파일을 만들어 직접 import 합니다.
+
+```jsx
+// App.js
+import './App.css';
+```
+
+---
+
+## 📊 데이터 표시하기
+
+- JSX를 사용하면 **자바스크립트 내부에 마크업을 작성**할 수 있습니다.  
+  (즉, 마크업 안에서 자바스크립트를 사용하는 것이 **아니라** 자바스크립트 안에서 마크업을 작성하는 것입니다.)
+
+---
+
+### ✨ JSX 안에서 JavaScript 표현식 사용하기 (Escape Back)
+
+- JSX에서는 `{}`를 사용하여 **변수나 표현식**을 삽입할 수 있습니다.
+
+```jsx
+const name = "Alex";
+
+return <h1>Hello, {name}!</h1>;
+```
+
+- 속성에서도 변수 사용이 가능합니다:
+
+```jsx
+<img src={user.imageUrl} className="avatar" />
+```
+
+- 위 예제에서
+  - `src={user.imageUrl}`: **변수 값을 전달**
+  - `className="avatar"`: **단순한 문자열**
+
+
 # 3월 20일 강의내용
 
 ## 1. Node.js

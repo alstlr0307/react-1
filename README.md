@@ -1,5 +1,427 @@
 # 202130104 김민식
 
+# 4월 10일 강의내용
+
+## 📌 보드 만들기
+
+### 📦 React에서 props를 통해 데이터 전달하기
+
+> 이 문서는 React의 기본 개념 중 하나인 `props`를 통해 컴포넌트 간 데이터를 전달하는 과정을 설명합니다.  
+> 재사용 가능한 구조로 코드를 개선하는 데 중점을 둡니다.
+
+---
+
+### 📁 1단계: 컴포넌트 구조 개선하기
+
+- **React의 component architecture**를 사용하여 **재사용 가능한 component**를 생성합니다.
+- 불필요하고 **중복된 코드를 제거**합니다.
+
+#### 🛠️ 작업 순서
+
+1. `Board` component를 만들고, `Square` component의 내용을 복사합니다.
+2. `Square` component의 `button`을 하나만 남기고 모두 삭제합니다.
+3. `Board` component의 `button`을 `Square` component로 교체합니다.
+4. `App`에서 호출하는 component를 `Square`에서 `Board`로 변경합니다.
+5. 정상적으로 출력이 되는지 확인합니다.
+
+> ✅ 이렇게 하면 구조는 깔끔해지지만, **숫자 출력이 1만 나오게 됩니다.**
+
+---
+
+### 📌 2단계: props를 사용한 데이터 전달
+
+- 이제 **props를 사용하여 값 전달**을 구현하겠습니다.
+- 부모 컴포넌트인 `Board`에서 자식 컴포넌트인 `Square`로 값을 넘겨줘야 합니다.
+
+#### ✅ Square 컴포넌트 수정
+
+```jsx
+function Square({ value }) {
+  return <button className="square">1</button>;
+}
+```
+
+---
+
+### 🧩 사용자와 상호작용하는 컴포넌트 만들기
+
+> 🛑 한글 문서에서 "사각형"이라고 번역된 것은 모두 **Square 컴포넌트**를 의미합니다.
+
+이제 사용자와의 상호작용을 위해 **Square 컴포넌트를 클릭할 수 있도록** 코드를 수정해보겠습니다.
+
+#### ✍️ 구현 순서
+
+1. `Square` 내부에 `handleClick` 함수를 선언하세요.
+2. JSX에서 반환되는 버튼에 `props`로 `onClick` 이벤트를 연결합니다.
+
+#### 💻 예시 코드
+
+```jsx
+function Square({ value }) {
+  function handleClick() {
+    console.log("clicked!");
+  }
+
+  return (
+    <button className="square" onClick={handleClick}>
+      {value}
+    </button>
+  );
+}
+```
+
+---
+
+## 🔁 상태 기억: 사용자와 상호작용하는 컴포넌트 만들기 (2)
+
+> 이번에는 사각형을 클릭했을 때 **'기억'** 하도록 만들어, "X"나 다른 값으로 표시되게 하겠습니다.
+
+### 🧠 상태 저장의 개념
+
+- 컴포넌트는 무언가를 기억하기 위해 `state`를 사용합니다.
+- React는 상태 기억을 위해 `useState`라는 **Hook**을 제공합니다.
+- 이제 `Square` 컴포넌트의 현재 값을 `state`로 저장하고, 클릭 시 상태가 변경되도록 하겠습니다.
+
+---
+
+### 🛠️ 구현 절차
+
+1. 파일 상단에서 `useState`를 **import**합니다.
+2. `Square` 컴포넌트에서 `value` prop을 제거합니다.
+3. 대신 `useState`를 호출하여 내부 상태로 값을 관리합니다.
+
+---
+
+### 💻 예시 코드
+
+```jsx
+import { useState } from 'react';
+
+function Square() {
+  const [value, setValue] = useState(null);
+
+  function handleClick() {
+    // 나중에 상태를 바꿔주는 로직 작성 예정
+  }
+
+  return (
+    <button className="square" onClick={handleClick}>
+      {value}
+    </button>
+  );
+}
+```
+
+---
+
+## 🛠️ 상태 관리를 위한 리팩토링
+
+### 📌 상태 변수와 설정 함수
+
+- `value`는 **값을 저장하는 변수**,  
+  `setValue`는 **값을 변경하는 함수**입니다.
+- `useState(null)`의 의미는 **state 변수의 초기값이 null**이라는 뜻입니다.
+
+### 🔄 props 제거하기
+
+- 이제 `Square` 컴포넌트는 더 이상 `props`를 사용하지 않게 수정했습니다.
+- 따라서 `Board` 컴포넌트에서 생성되는 9개의 `Square`에도 더 이상 `value` prop을 넘기지 않습니다.
+
+---
+
+### 💻 예시 코드: 변경된 Board 컴포넌트
+
+```jsx
+export default function Board() {
+  return (
+    <>
+      <div className="board-row">
+        <Square />
+        <Square />
+        <Square />
+      </div>
+    </>
+  );
+}
+```
+
+---
+
+## 🖱️ 클릭 시 X 표시되도록 만들기
+
+> 이제 `Square` 컴포넌트를 클릭하면 **"X"가 출력**되도록 구현해보겠습니다.
+
+### ✅ 변경 사항 요약
+
+5. `console.log("clicked!")` 대신에  
+   이벤트 핸들러를 `setValue("X")`로 변경합니다.
+
+### 💻 변경된 Square 컴포넌트 코드
+
+```jsx
+function Square() {
+  const [value, setValue] = useState(null);
+
+  function handleClick() {
+    setValue('X');
+  }
+
+  return (
+    <button className="square" onClick={handleClick}>
+      {value}
+    </button>
+  );
+}
+```
+
+---
+
+## 🧱 각 컴포넌트의 독립적인 상태
+
+> `Square` 컴포넌트 하나하나가 **고유한 state**를 갖고 있으며, 서로 영향을 주지 않도록 독립적으로 동작합니다.
+
+### 🧩 핵심 개념 정리
+
+- 각 **`Square`는 고유한 state**를 가지고 있습니다.
+- 각 Square에 저장된 `value`는 **다른 Square와 완전히 독립적**입니다.
+- 컴포넌트에서 `set` 함수를 호출하면, **React는 자동으로 해당 컴포넌트와 자식 컴포넌트를 업데이트**합니다.
+
+### 🔄 결과적으로
+
+- 하나의 `Square`를 클릭해 `"X"`를 표시해도,
+- 다른 `Square`는 아무 영향도 받지 않고 **각자의 상태**만 유지하게 됩니다.
+
+> 🎯 이는 React의 **컴포넌트 기반 아키텍처**와 **단방향 데이터 흐름**의 기본 구조를 이해하는 데 매우 중요한 부분입니다.
+
+---
+
+## 📤 state 끌어올리기 (Lifting State Up)
+
+> 지금까지는 각 `Square` 컴포넌트가 자체적으로 `state`를 가지고 있었습니다.  
+> 하지만 **게임 전체의 상태**를 관리하려면 더 상위 컴포넌트에서 상태를 관리해야 합니다.
+
+### 🎯 왜 끌어올려야 하나요?
+
+- 현재 각 `Square` 컴포넌트는 게임의 일부 상태만을 기억하고 있습니다.
+- 틱택토(Tic Tac Toe) 게임에서 승자를 판단하려면,
+  `Board`가 9개의 `Square`의 상태를 모두 알고 있어야 합니다.
+
+---
+
+### 🧠 접근 방식 비교
+
+#### ❌ 방법 1: Board가 각 Square에게 state를 “요청”하는 방식
+
+- 기술적으로는 React에서 구현 가능하지만...
+  - **이해하기 어렵고**
+  - **버그에 취약**하며
+  - **리팩토링하기 어려운 구조**입니다.
+- 따라서 **비추천되는 방식**입니다.
+
+#### ✅ 방법 2: 게임의 state를 Board에 저장
+
+- 가장 좋은 방법은 게임 상태를 `Square`가 아닌 **부모 컴포넌트인 `Board`에 저장**하는 것입니다.
+- 그렇게 하면 `Board`가 상태를 관리하고, 각 `Square`에는 **props를 통해 값을 전달**하게 됩니다.
+
+---
+
+### 🔄 핵심 요약
+
+| 항목 | 설명 |
+|------|------|
+| 현재 구조 | 각 Square가 개별 state 보유 |
+| 개선할 구조 | Board가 전체 상태 보유, Square는 props만 사용 |
+| 이점 | 승자 판단, 전체 흐름 관리, 유지보수 쉬움 |
+
+> 🎯 다시 말해, 각 Square의 state를 "끌어올려" **부모 컴포넌트인 `Board`에서 중앙집중식으로 관리**하겠다는 의미입니다.
+
+---
+
+---
+
+## 🗂️ component 분리하기
+
+> 지금까지는 `Board`와 `Square`를 하나의 파일에 작성했지만, 이제 각각의 **컴포넌트를 독립된 파일로 분리**해보겠습니다.
+
+### ⚠️ 분리 힌트
+
+- `Board` 컴포넌트가 `export default`로 선언되어 있다는 건, **별도의 파일로 분리되었다는 의미**입니다.
+- 우리도 이를 따라 **컴포넌트를 파일 단위로 정리**합니다.
+
+---
+
+### 🧱 컴포넌트 분리 순서
+
+1. 컴포넌트 이름과 동일한 파일을 생성합니다.  
+   예: `Board.js`, `Square.js`
+2. 해당 파일로 코드를 복사하고 `export default`를 붙입니다.
+3. 필요 시 `useState`, `React` 등을 import 합니다.
+4. `App.js`에서 해당 코드를 삭제하고, `Board` 컴포넌트를 import 합니다.
+5. `App.js`에서 `useState` import가 더 이상 필요 없다면 제거합니다.
+6. 정상적으로 앱이 작동하는지 확인합니다.
+
+---
+
+### 📁 예시 디렉토리 구조
+
+src/ ├── components/ │ ├── Board.js │ └── Square.js ├── App.js └── index.js
+> ✅ 이처럼 컴포넌트를 분리하면 유지보수도 쉽고, 협업도 훨씬 효율적입니다.
+
+---
+
+## 🔼 state 끌어올리기 (2): Board가 상태를 관리하기
+
+> 이제 `Board` 컴포넌트는 모든 `Square`의 상태를 하나로 모아서 관리합니다.  
+> 그리고 각 `Square`에 **props를 통해 값(value)** 을 전달합니다.
+
+### ✅ Board 컴포넌트 내부에서 state 정의
+
+```jsx
+export default function Board() {
+  const [squares, setSquares] = useState(Array(9).fill(null));
+
+  return (
+    <>
+      <div className="board-row">
+        <Square value={squares[0]} />
+        <Square value={squares[1]} />
+        <Square value={squares[2]} />
+      </div>
+      <div className="board-row">
+        <Square value={squares[3]} />
+        <Square value={squares[4]} />
+        <Square value={squares[5]} />
+      </div>
+      <div className="board-row">
+        <Square value={squares[6]} />
+        <Square value={squares[7]} />
+        <Square value={squares[8]} />
+      </div>
+    </>
+  );
+}
+```
+
+---
+
+## 📥 state 끌어올리기 (3): Square는 props만 사용
+
+> 이제 `Square`는 더 이상 상태를 관리하지 않고,  
+> `Board`로부터 전달받은 `value prop`만 **표시 전용**으로 사용합니다.
+
+---
+
+### 📌 작업 요약
+
+3. `Board` 컴포넌트에서 각 `Square`에 `value prop`을 전달합니다.  
+4. `Square` 컴포넌트를 다음과 같이 수정하여 해당 `prop`을 받을 수 있도록 합니다:
+
+```jsx
+function Square({ value }) {
+  return (
+    <button className="square">
+      {value}
+    </button>
+  );
+}
+```
+
+---
+
+## 🖱️ 클릭 이벤트 전달: 이벤트 핸들러 위임하기
+
+> `Square` 컴포넌트는 클릭되었을 때 **자체적으로 처리하지 않고**,  
+> 부모인 `Board`로부터 받은 `onSquareClick` 함수를 호출합니다.
+
+---
+
+### 🎯 목표
+
+- `Board` → `Square`로 함수를 prop 형태로 전달
+- `Square`에서 `onClick` 이벤트 시 해당 함수를 호출
+
+---
+
+### 💻 5단계: Square 컴포넌트 클릭 시 함수 호출
+
+```jsx
+function Square({ value }) {
+  return (
+    <button className="square" onClick={onSquareClick}>
+      {value}
+    </button>
+  );
+}
+```
+> 위 코드엔 아직 오류가 있습니다. 
+
+### 💻 6단계: props로 onSquareClick 추가
+
+```jsx
+function Square({ value, onSquareClick }) {
+  return (
+    <button className="square" onClick={onSquareClick}>
+      {value}
+    </button>
+  );
+}
+```
+
+---
+
+## 🧭 상태 끌어올리기 (4): 클릭 핸들러 연결
+
+> 이제 `Square`는 클릭 시 부모인 `Board`에서 정의한 `handleClick` 함수를 호출하게 됩니다.
+
+---
+
+### 💻 7단계: `onSquareClick` prop을 `handleClick`과 연결
+
+```jsx
+export default function Board() {
+  const [squares, setSquares] = useState(Array(9).fill(null));
+
+  function handleClick() {
+    // 클릭 시 상태 업데이트 로직 (다음 단계에서 구현)
+  }
+
+  return (
+    <>
+      <div className="board-row">
+        <Square value={squares[0]} onSquareClick={handleClick} />
+        {/* 나머지 Square들도 동일하게 처리 */}
+      </div>
+    </>
+  );
+}
+```
+
+---
+
+## 🔚 상태 끌어올리기 (5): handleClick로 상태 변경하기
+
+> `Board` 컴포넌트 내에서 상태 배열 `squares`를 복사한 뒤, 특정 값을 변경하여 다시 업데이트합니다.
+
+---
+
+### 💻 8단계: handleClick 함수 작성
+
+```jsx
+export default function Board() {
+  const [squares, setSquares] = useState(Array(9).fill(null));
+
+  function handleClick() {
+    const nextSquares = squares.slice();  // 기존 배열 복사 (불변성 유지)
+    nextSquares[0] = "X";                 // 인덱스 0 위치에 "X" 설정
+    setSquares(nextSquares);              // 상태 업데이트
+  }
+
+  return (
+    // Square 컴포넌트들 렌더링
+  );
+}
+```
+
 # 4월 3일 강의내용 
 
 ## 📌 이벤트에 응답하고 화면 업데이트하기  

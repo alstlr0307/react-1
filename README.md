@@ -1,5 +1,417 @@
 # 202130104 김민식
 
+# 4월 17일 강의내용
+
+## 📌 State 끌어올리기
+
+## 📁 시도해보기.
+
+- `handleClick` 함수는 **JavaScript의 `slice()` 배열 메서드**를 사용하여 `squares` 배열의 사본인 `nextSquares`를 생성합니다.  
+  (📚 참고 : [developer.mozilla.org](https://developer.mozilla.org))
+
+- 그 다음 `handleClick` 함수는 `nextSquares` 배열의 첫 번째 `Squares(index [0])`에 `X`를 추가하여 업데이트합니다.
+
+- `setSquares` 함수를 호출하면 **React는 컴포넌트의 `state`가 변경되었음을 감지**합니다.
+
+- 그러면 `squares`의 `state`를 사용하는 컴포넌트(`Board`)와 그 하위 컴포넌트(보드를 구성하는 `Square` 컴포넌트)가 **다시 렌더링** 됩니다.
+
+---
+
+### 💡 중요한 포인트
+
+> 이 설명은 문서의 코드 중 **`Board`가 `Square`를 포함하고 있음을 전제**합니다.
+
+- JavaScript는 **클로저(Closure)**를 지원하기 때문에 내부 함수가(`handleClick`) 외부 함수(`Board`)에 정의된 변수 및 함수에 접근할 수 있습니다.
+
+- `handleClick` 함수는 `squares`의 `state`를 읽고 `setSquares` 메서드를 호출할 수 있는데,  
+  **이 함수는 `Board` 함수 내부에 정의되어 있기 때문입니다.**
+
+---
+
+## 🔁 모든 Square 업데이트하기
+
+- 이제 보드에 X를 추가할 수 있게 되었지만 가능한 건 **오직 왼쪽 위 Square 뿐**입니다.
+
+- `handleClick` 함수는 **왼쪽 위 `Square(index 0)`만 업데이트**하도록 하드코딩되어 있습니다.
+
+- **모든 사각형을 업데이트할 수 있도록** `handleClick` 함수를 수정하겠습니다.
+
+---
+
+### ✍️ 구현 과제
+
+9. `handleClick` 함수에 **업데이트할 `Square`의 `index`를 나타내는 인수 `i`**를 추가하세요.
+
+```jsx
+export default function Board() {
+  const [squares, setSquares] = useState(Array(9).fill(null));
+
+  function handleClick(i) {
+    const nextSquares = squares.slice();
+    nextSquares[i] = "X";
+    setSquares(nextSquares);
+  }
+
+  return (
+    // ...
+  );
+}
+```
+
+---
+
+## 🔁 함수 실행이 아닌 참조 전달하기
+
+- 이제 `handleClick`에 **직접 인수를 전달하지 않고, 함수 참조로 넘기는 방법**을 배워야 합니다.
+
+- 다음과 같이 **콜백 함수 형태**로 작성하면, `handleClick`이 즉시 실행되지 않고 클릭 시에만 실행됩니다.
+
+```jsx
+<Square value={squares[0]} onSquareClick={() => handleClick(0)} />
+```
+
+> ✅ 이 방법이 올바른 이유
+
+- () => `handleClick(0)`는 새로운 함수를 생성하며, 해당 함수는 `클릭 이벤트가 발생할 때`까지 `실행되지 않습니다`.
+
+- 이 방식은 `handleClick`의 실행을 렌더링 시점이 아닌, 클릭 이벤트 시점으로 미루게 됩니다.
+
+- 결과적으로 무한 루프 없이 안전하게 원하는 `index`의 `Square`만 업데이트할 수 있습니다.
+
+> 🧠 이처럼 렌더링 시 실행되는 코드와 이벤트 핸들러로 실행되는 코드를 명확히 분리하는 것은 `React`에서 매우 중요한 개념입니다.
+
+---
+
+## 🔁 상위 컴포넌트에서 state 관리하기
+
+- 이제 `Board`가 모든 `state`를 관리하므로, **부모 `Board` 컴포넌트는 자식 `Square` 컴포넌트가 올바르게 표시될 수 있도록 `props`를 전달**합니다.
+
+- `Square`를 클릭하면, 자식 `Square` 컴포넌트가 **부모 `Board` 컴포넌트에 `Board`의 `state` 업데이트**를 요청하게 됩니다.
+
+- `Board`의 `state`가 변경되면, **`Board` 컴포넌트와 모든 자식 `Square` 컴포넌트가 자동으로 다시 렌더링** 됩니다.
+
+- `Board` 컴포넌트에 속한 모든 `Square`의 `state`를 유지하면, **나중에 승자를 판단하는 로직을 쉽게 구현할 수 있습니다.**
+
+---
+
+## 🔁 클릭 시 상태 변경 흐름 정리하기
+
+- 사용자가 `Board`의 **왼쪽 위 사각형을 클릭**하여 `X`를 추가하면 어떤 일이 발생하는지 **다시 한 번 정리**해 보겠습니다.
+
+### 🧭 흐름 정리
+
+1. **왼쪽 위 사각형**을 클릭하면 `button`이 `Square`로부터 받은  
+   `onClick prop`의 함수가 실행됩니다.
+   - `Square` 컴포넌트는 `Board`에서 해당 함수를 `onSquareClick props`로 전달받았습니다.
+   - `Board` 컴포넌트는 JSX에서 직접 이 함수를 정의했습니다.
+   - 이 함수는 `0`을 인수로 `handleClick`을 호출합니다.
+
+2. `handleClick`은 인수 `0`을 사용하여 `squares` 배열의  
+   첫 번째 요소(`null`)를 `"X"`로 업데이트합니다.
+
+3. `Board` 컴포넌트의 `squares state`가 업데이트되어,  
+   `Board`와 모든 자식 `Square` 컴포넌트가 다시 렌더링됩니다.
+   - 이때 index가 `0`인 `Square`의 `value prop`이 `null`에서 `"X"`로 변경됩니다.
+
+4. 최종적으로 **사용자는 왼쪽 위 사각형을 클릭한 후,  
+   비어 있던 사각형이 `"X"`로 변경된 것을 확인하게 됩니다.**
+
+---
+
+## 🔁 사용자 정의 컴포넌트의 이벤트 prop 이해하기
+
+> 💡 중요합니다!
+
+- DOM `<button>` 엘리먼트의 `onClick` 속성은 **빌트인 컴포넌트이기 때문에,  
+  React에서는 특별한 의미를 가집니다.**
+
+- **사용자 정의 컴포넌트**(예: `Square`)의 경우,  
+  prop의 이름은 사용자가 원하는 대로 자유롭게 지정할 수 있습니다.
+
+- 예를 들어 `Square`의 `onSquareClick` prop이나 `Board`의 `handleClick` 함수에  
+  어떤 이름을 붙여도 **동일하게 작동**합니다.
+
+---
+
+### ✅ React의 관례
+
+- React에서는 주로 **이벤트를 나타내는 prop**에는 `onSomething` 같은 이름을 사용하고,  
+  **이벤트를 처리하는 함수**는 `handleSomething` 같은 이름을 사용합니다.
+
+예시:
+- `onClick`, `onChange`, `onSubmit` 등은 props
+- `handleClick`, `handleChange`, `handleSubmit` 등은 함수 이름
+
+---
+
+## 🧊 10단계: 불변성이 왜 중요할까요?
+
+- `handleClick`에서는 기존 배열을 수정하는 대신, `slice()`를 호출하여  
+  `squares` 배열의 **사본을 생성하는 방식**에 주목하세요.
+
+- 그 이유를 설명하기 위해 **불변성과 그 중요성**에 대해 알아봅니다.
+
+---
+
+### 🔁 데이터를 변경하는 두 가지 방법
+
+1. **데이터를 직접 변경**하여 값을 수정하는 방식  
+2. **변경 사항이 있는 새 복사본**으로 데이터를 대체하는 방식 (React에서 선호)
+
+---
+
+### ❌ 직접 변경 예시
+
+```jsx
+const squares = [null, null, null, null, null, null, null, null, null];
+squares[0] = 'X';
+// Now `squares` is ["X", null, null, null, null, null, null, null, null];
+```
+> 복사 후 대체 예시
+
+```jsx
+const squares = [null, null, null, null, null, null, null, null, null];
+const nextSquares = ['X', null, null, null, null, null, null, null, null];
+// Now `squares` is unchanged, but `nextSquares` first element is 'X' rather than `null`
+```
+
+---
+
+## 🚀 불변성이 주는 실제적인 이점
+
+- 최종 결과는 같지만, **원본 데이터를 직접 변경하지 않음으로써** 여러 가지 이점을 얻을 수 있습니다.
+
+---
+
+### 🔎 왜 불변성이 중요한가요?
+
+1. **복잡한 기능을 더 쉽게 구현할 수 있습니다.**
+
+   - 불변성을 유지하면 상태 변경 내역을 추적하거나 롤백하는 기능을 만들기 수월해집니다.
+
+2. 예를 들어, **"시간 여행" 기능**을 구현할 수 있습니다.
+
+   - 우리는 이후 단계에서 게임의 진행 과정을 기록하고,  
+     과거 상태로 "되돌아가기"를 구현할 예정입니다.
+
+3. **실행 취소 및 재실행 기능**은 게임에만 국한된 것이 아니라,  
+   다양한 앱에서 요구되는 일반적인 기능입니다.
+
+4. **기존 데이터를 그대로 유지**하면,  
+   언제든지 이전 버전으로 재사용하거나 초기화할 수 있습니다.
+
+---
+
+## ⚙️ 불변성과 렌더링 최적화
+
+2. **불변성을 사용하면 또 다른 중요한 장점**도 있습니다.
+
+---
+
+### 🧠 성능 관점에서의 이점
+
+- 기본적으로 **부모 컴포넌트의 `state`가 변경되면,  
+  모든 자식 컴포넌트가 자동으로 다시 렌더링**됩니다.
+
+  - 이때 변경 사항이 없는 자식 컴포넌트도 포함됩니다.
+
+- **리렌더링 자체는 사용자에게 보이지 않지만**,  
+  성능 최적화를 위해 **불필요한 렌더링은 피하는 것이 좋습니다.**
+
+---
+
+### ✅ 불변성이 성능에 미치는 영향
+
+- 불변성을 지키면 컴포넌트가 **데이터의 변경 여부를  
+  저렴한 비용으로 판단**할 수 있습니다.
+
+- React는 이러한 구조를 바탕으로 **렌더링 최적화 기능**을 제공합니다.
+
+> 참고: `memo` API를 사용하면 React가 컴포넌트를  
+  **언제 다시 렌더링할지 선택하는 방법**을 설정할 수 있습니다.
+
+---
+
+## 🎮 교대로 두기 - X와 O 표시하기 (1)
+
+- 지금까지 만든 틱택토 게임에서 가장 큰 문제였던  
+  **"O"를 보드에 표시할 수 없던 문제**를 해결해보겠습니다.
+
+  > 해결된 코드(완성된 코드)
+
+```jsx
+export default function Board() {
+  const [xIsNext, setXIsNext] = useState(true);
+  const [squares, setSquares] = useState(Array(9).fill(null));
+
+  function handleClick(i) {
+    const nextSquares = squares.slice();
+    if (xIsNext) {
+      nextSquares[i] = "X";
+    } else {
+      nextSquares[i] = "O";
+    }
+    setSquares(nextSquares);
+    setXIsNext(!xIsNext);
+  }
+
+  return (
+    // ...
+  );
+}
+```
+
+---
+
+### ⚙️ 첫 번째 선수 설정 및 상태 관리
+
+1. **첫 번째 선수가 두는 말을 `"X"`로 설정**합니다.  
+   이제 `Board` 컴포넌트에 **또 다른 state**를 추가해 추적할 수 있습니다.
+
+```jsx
+function Board() {
+  const [xIsNext, setXIsNext] = useState(true);
+  const [squares, setSquares] = useState(Array(9).fill(null));
+
+  // ...
+}
+```
+
+## ⛔ 이미 채워진 사각형은 무시하기
+
+- 이제 다른 사각형을 클릭하면 `"X"`와 `"O"`가 **정상적으로 번갈아 표시**됩니다.
+
+---
+
+### ❗ 새로운 문제 발견
+
+- **같은 칸을 여러 번 클릭해 보세요.**
+- `"O"`가 `"X"`를 덮어쓰는 상황이 발생합니다!
+- 물론 게임을 흥미롭게 만들 순 있지만, 지금은 **기본 규칙**을 유지하겠습니다.
+
+---
+
+### 🔍 문제 원인
+
+- 현재 로직은 `"X"` 또는 `"O"`를 사각형에 표시할 때,  
+  **해당 칸이 이미 채워졌는지를 확인하지 않고 있습니다.**
+
+---
+
+### ✅ 해결 방법
+
+> 클릭된 사각형에 값이 이미 있는 경우에는 아무 작업도 하지 않고 종료하면 됩니다.
+
+1. `handleClick` 함수에서, 사각형(`squares[i]`)이 이미 채워졌는지 확인합니다.
+2. 값이 존재한다면 `return`하여 **함수 실행을 중단**합니다.
+
+```jsx
+function handleClick(i) {
+  if (squares[i]) {
+    return;
+  }
+
+  const nextSquares = squares.slice();
+  // 이후 로직 진행...
+}
+```
+
+---
+
+## 📌 보충 개념: `return`의 의미
+
+- 작성한 코드에는 `return` 값이 없습니다.
+
+```js
+if (squares[i]) {
+  return;
+}
+
+```
+---
+
+## 🏆 승자 결정 함수 추가하기
+
+- 이제 어느 플레이어의 차례인지 표시하는 것 외에도,  
+  **게임의 승자가 결정되었을 경우 더 이상 차례를 만들 필요가 없습니다.**
+
+---
+
+### 🧮 승자 확인을 위한 함수 추가
+
+- 9개의 사각형 배열을 가져와서 **승자를 판별**하는 함수  
+  `calculateWinner`를 추가합니다.
+
+- 이 함수는 `"X"`, `"O"`, 또는 `null` 값을 반환합니다.
+
+- 걱정 마세요! `calculateWinner` 함수는 React 전용이 아니며,  
+  **일반적인 JavaScript 도우미 함수(helper function)**입니다.
+
+---
+
+### ⚙️ 위치는 어디에 정의해야 하나요?
+
+- `calculateWinner` 함수는 **`Board` 함수 바깥에 정의하거나 안에 정의해도 상관없습니다.**
+
+- 이 예제에서는 **컴포넌트를 편집할 때 불편하지 않도록 파일의 하단에 배치**하겠습니다.
+
+```js
+// 예시 위치
+function calculateWinner(squares) {
+  // ...
+}
+
+```
+
+---
+---
+
+## 🧩 보충 개념: 구조 분해 할당 (Destructuring Assignment)
+
+> 구조 분해 할당은 **배열이나 객체의 값을 개별 변수로 쉽게 추출하는 방법**입니다.
+
+---
+
+### 📘 개념 요약
+
+- **비구조화 할당** 또는 **구조화 할당**이라고도 불리며,  
+  JavaScript에서 매우 자주 사용되는 문법입니다.
+
+- 배열이나 객체의 구조를 해체하여, **내부 값들을 개별 변수에 할당**할 수 있습니다.
+
+- 이를 통해 **코드의 간결성과 가독성**을 높일 수 있습니다.
+
+---
+
+### 📦 배열의 구조 분해 예시
+
+```js
+const pairs = [
+  [1, 2],
+  [3, 4],
+  [5, 6]
+];
+
+pairs.map(([x, y]) => {
+  console.log(`x: ${x}, y: ${y}`);
+});
+
+```
+
+> 🗂️ 객체의 구조 분해 예시
+
+```jsx
+const users = [
+  { id: 1, name: "Alice" },
+  { id: 2, name: "Bob" }
+];
+
+users.map(({ id, name }) => {
+  console.log(`${id}: ${name}`);
+});
+```
+
+
 # 4월 10일 강의내용
 
 ## 📌 보드 만들기

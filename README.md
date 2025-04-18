@@ -1,5 +1,196 @@
 # 202130104 김민식
 
+# 4월 18일 강의내용
+
+## 📌 State 끌어올리기 ver.2
+---
+
+## ⏳ 시간 여행 기능 준비하기
+
+이제 우리는 게임의 과거 상태를 저장하고,  
+원하는 시점으로 "되돌아가기" 기능을 구현하려고 합니다.
+
+---
+
+### ✅ 핵심 요약
+
+- `history` 배열에는 게임의 **모든 이전 상태(`squares`)**가 저장됩니다.
+- `map()` 함수를 사용해 `history`의 각 요소와 인덱스를 순회하며 **무브 리스트**를 생성합니다.
+
+---
+
+### 🎯 각 무브에 대해:
+
+- `move === 0`이면 → `"Go to game start"`
+- `move > 0`이면 → `"Go to move #n"`
+
+이 텍스트는 `description` 변수에 저장됩니다.
+
+- `onClick` 이벤트로 각 버튼을 클릭 시 해당 무브로 이동하도록 구현됩니다.
+- `map()` 내부에서는 `move` 인덱스를 활용하여 해당 상태의 `squares`를 참조합니다.
+
+- 버튼 JSX 요소들은 `moves` 배열에 저장되며, 이후 렌더링됩니다.
+
+---
+
+### 💡 코드 개요 예시
+
+```jsx
+const moves = history.map((squares, move) => {
+  const description = move > 0
+    ? `Go to move #${move}`
+    : 'Go to game start';
+
+  return (
+    <li key={move}>
+      <button onClick={() => jumpTo(move)}>{description}</button>
+    </li>
+  );
+});
+```
+
+---
+
+---
+
+## 📘 보충 설명: map과 history.map의 구조 이해
+
+> 문서 번역이 다소 어렵게 느껴질 수 있으므로,  
+> `history.map((squares, move) => {})` 구문을 다시 자세히 정리해보겠습니다.
+
+---
+
+### 🧱 map 함수 기본 구조
+
+- 기본 구문:  
+  `array.map(callbackFn)`  
+  또는 `array.map(callbackFn, thisArg)`
+
+- 여기서 `thisArg`는 `this`의 바인딩을 지정할 때 사용되며,  
+  **화살표 함수에서는 생략**됩니다.
+
+- 예제에서는 오직 `callbackFn`만 사용하며,  
+  `map()`의 인자로 들어간 화살표 함수는 **콜백 함수의 대체**입니다.
+
+```js
+const moves = history.map((squares, move) => { ... });
+```
+
+---
+
+## 📘 보충 개념: map 함수의 사용 정리
+
+> 지금까지 설명한 `history.map((squares, move) => { ... })` 구문을 예시와 함께 다시 정리합니다.
+
+---
+
+### 🔄 map의 구성 요소
+
+- **원본 배열(history)**: `map()`이 호출된 대상 배열입니다.
+- **인덱스(move)**: 현재 순환 중인 요소의 인덱스 번호입니다.
+- **값(squares)**: 현재 순환 중인 요소의 실제 값입니다.
+
+---
+
+### 📌 map 함수의 실제 동작 예시
+
+```js
+const moves = history.map((squares, move) => { ... });
+```
+
+> 예를 들어 `History` 배열이 다음과 같은 상태라면
+
+```js
+history = [
+  [null, null, null, null, null, null, null, null, null],        // move = 0
+  ['X', null, null, null, null, null, null, null, null],         // move = 1
+  ['X', 'O', null, null, null, null, null, null, null]           // move = 2
+];
+```
+
+> 이때 `Map`은 다음과 같이 반복됩니다
+- **순번	squares 값	move 값**
+- *1	[null, null, ...]	0*
+- *2	['X', null, ...]	1*
+- *3	['X', 'O', null, ...]	2*
+
+---
+
+---
+
+## 🔑 보충 개념: React에서 key 선택하기
+
+리스트를 렌더링할 때, React는 각 항목을 식별하기 위해 `key`라는 속성을 사용합니다.  
+`key`는 각 요소가 어떤 항목인지 구분하기 위한 **고유 식별자 역할**을 합니다.
+
+---
+
+### 📋 리스트 렌더링 시 React의 동작 방식
+
+- React는 렌더링 후 **각 리스트 항목에 대한 정보를 저장**합니다.
+- 리스트가 업데이트되면 **무엇이 변경되었는지** 판단해야 합니다.
+- 항목은 **추가, 삭제, 재정렬, 업데이트**될 수 있습니다.
+
+---
+
+### 🧩 예시
+
+```html
+// 변경 전
+<li>Alexa: 7 tasks left</li>
+<li>Ben: 5 tasks left</li>
+
+// 변경 후
+<li>Ben: 9 tasks left</li>
+<li>Claudia: 8 tasks left</li>
+<li>Alexa: 5 tasks left</li>
+```
+
+> 개발자의 의도: `task` 수만 바뀐 것
+> React의 판단: 순서가 바뀌고 `새로운 항목이 추가된 것`으로 인식
+
+---
+
+## ⚠️ 왜 문제가 될까?
+React는 컴퓨터 프로그램이기 때문에, 사람의 의도를 추론하지 못합니다.
+
+우리는 단순히 `task` 수가 바뀌었다고 생각하지만,
+React는 항목이 `통째로` 바뀌었다고 판단할 수 있습니다.
+
+✅ 해결책: key 속성 사용
+key는 리스트에서 각 항목을 `고유하게 식별할 수 있는 값`으로 지정해야 합니다.
+
+이를 통해 React는 어떤 항목이 같은 항목인지, 어떤 항목이 새로 추가되었는지 정확히 파악합니다.
+```jsx
+<li key={user.id}>Alexa: 7 tasks left</li>
+```
+> 항상 리스트 렌더링 시 고유한 `Key` 지정을 잊으면 안된다
+
+---
+
+## 🔄 key가 컴포넌트에 미치는 영향
+
+- 리스트가 다시 렌더링되면 React는 **현재 리스트의 key**와  
+  **이전 리스트의 key**를 비교합니다.
+
+#### 상황별 작동 방식:
+
+1. 현재 리스트에 **없던 key가 추가** → 새 컴포넌트 생성  
+2. 이전에는 있었지만 **현재는 없는 key** → 컴포넌트 제거  
+3. **key가 동일** → 컴포넌트 재사용 및 이동 처리
+
+---
+
+### 🎯 key가 중요한 이유
+
+- React는 key를 기준으로 **컴포넌트를 식별**합니다.
+- 컴포넌트를 다시 렌더링할 때 **key가 같으면 기존 state 유지**  
+- key가 달라지면 **기존 컴포넌트 제거 + 새 컴포넌트 생성**
+
+> 컴포넌트의 상태(state)를 유지하려면 key를 **일관성 있게 관리**하는 것이 중요합니다.
+
+---
+
 # 4월 17일 강의내용
 
 ## 📌 State 끌어올리기

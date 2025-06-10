@@ -1,7 +1,304 @@
 # 202130104 김민식
 
+# 6월 5일 강의내용
+
+## 📌 기존 웹사이트에 React 컴포넌트 통합하기
+
+### 기존 프로젝트에 React 추가
+
+#### [ 페이지 어디에서든 React 컴포넌트 렌더링하기 ]
+
+- 이전 단계에서는, **메인 파일 최상단**에 아래 코드를 넣었습니다.
+
+```jsx
+import { createRoot } from 'react-dom/client';
+
+document.body.innerHTML = '<div id="app"></div>';
+
+const root = createRoot(document.getElementById('app'));
+root.render(<h1>Hello, world</h1>);
+```
+
+---
+
+### 🧩 기존 프로젝트에 React 추가
+
+#### ✅ 이렇게 하면 `document.getElementById`로 HTML 엘리먼트를 찾아  
+`createRoot`에 전달함으로써 해당 요소 내부에 React 컴포넌트를 렌더링할 수 있습니다.
+
+```js
+import { createRoot } from 'react-dom/client';
+
+function NavigationBar() {
+  // TODO: 실제로 네비게이션 바를 구현합니다.
+  return <h1>Hello from React!</h1>;
+}
+
+const domNode = document.getElementById('navigation');
+const root = createRoot(domNode);
+root.render(<NavigationBar />);
+```
+
+💡 이 코드에는
+"This paragraph is a part of HTML."
+라는 문구를 찾을 수 없습니다.
+
+어디에 있을까요?
+
+👉 codesandbox에서 확인해 보세요.
+
+---
+
+### 🧩 기존 프로젝트에 React 추가
+
+- 기존에 존재하던 `index.html`의 원본 **HTML 콘텐츠가 그대로 남아있는 것**을 확인할 수 있습니다.
+
+- 하지만 이제는 `<nav id="navigation">` 안에  
+  개발자가 직접 작성한 **`NavigationBar` React 컴포넌트**가 나타납니다.
+
+- 기존 HTML 페이지에서 React 컴포넌트가 렌더링 되는 것에 대해 더 알아보려면  
+  👉 [`createRoot` 사용법 문서](https://react.dev/reference/react-dom/client/createRoot)를 읽어보세요.  
+  ※ 이 문서는 **React 내부 공식 문서**입니다.
+
+---
+
+- 기존 프로젝트에서 React를 도입할 때,  
+  일반적으로 **작은 상호작용용 컴포넌트(예: 버튼)**에서 시작하여  
+  → 점진적으로 "상위 구조로 확장하면서"  
+  → 결국에는 전체 페이지가 React로 빌드될 때까지 이 과정을 반복하게 됩니다.
+
+- 이 지점에 도달한다면  
+  👉 React의 장점을 최대한 활용하기 위해  
+  **React 프레임워크로 마이그레이션** 하는 것을 권장합니다.
+
+---
+
+### 🛠 에디터 설정하기
+
+- **VS Code**는 현재 가장 많이 사용되는 에디터 중 하나입니다.
+
+- VS Code에 설치할 수 있는 **익스텐션의 종류는 매우 많고**,  
+  **GitHub**과 같은 외부 서비스와의 연동도 지원합니다.
+
+- 아래에 나열된 기능들은 대부분 **익스텐션으로 존재**하기 때문에  
+  **VS Code의 설정은 다양한 방식으로 쉽게 변경**할 수 있습니다.
+
+---
+
+#### 그 외에도 React 커뮤니티에서는 다음과 같은 에디터들이 흔히 사용됩니다:
+
+- **WebStorm**  
+  → JavaScript에 특화되어 설계된 통합 개발 환경입니다.
+
+- **Sublime Text**  
+  → JSX와 TypeScript를 지원하며,  
+  → **문법 강조 및 자동 완성 기능**이 내장되어 있습니다.
+
+- **Vim**  
+  → 모든 종류의 텍스트를 매우 효율적으로 생성하고 변경할 수 있도록  
+    설계된 텍스트 편집기입니다.
+
+---
+
+### 🧩 에디터 기능 추천
+
+이러한 기능들이 기본으로 설정된 에디터들도 있지만,  
+**별도의 익스텐션 추가가 필요한 경우**도 존재합니다.  
+현재 사용 중인 에디터에서 어떤 기능을 지원하는지 꼭 확인해 보세요!
+
+---
+
+#### 1. ✅ Linting
+
+- **코드 린터**는 코드를 작성하는 동안  
+  → **실시간으로 문제를 찾아줌으로써 빠른 문제 해결이 가능**하도록 도와줍니다.
+
+- **[ESLint](https://eslint.org/)**는 많이 사용되고  
+  **JavaScript를 위한 대표적인 오픈소스 린터**입니다.
+
+  - [React를 위한 추천 설정과 함께 ESLint 설치하기](https://eslint.org/docs/latest/use/configure)  
+    (※ 설치 전 `Node`가 설치되어 있어야 함)
+  
+  - [VS Code의 ESLint 공식 익스텐션과 통합](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+
+- 프로젝트의 모든 `eslint-plugin-react-hooks` 규칙이 활성화됐는지 꼭 확인하세요.  
+  → 이 규칙은 필수이며, **가장 심각한 버그를 조기에 발견**하게 해줍니다.
+
+- 권장되는 `eslint-config-react-app` 프리셋에는  
+  → 이미 이 규칙이 포함되어 있습니다.
+
+---
+
+### ✨ Formatting
+
+- 다른 개발자들과 협업할 때 가장 피하고 싶은 것은  
+  → **탭 vs 공백**에 대한 논쟁일 것입니다.
+
+- 다행히 [**Prettier**](https://prettier.io/)를 사용하면  
+  → 직접 지정해 놓은 규칙들에 부합하도록 **코드 형식을 깔끔하게 정리**할 수 있습니다.
+
+- Prettier를 실행하면 다음과 같은 요소들이 설정에 맞춰 자동 정리됩니다:
+  - **탭은 공백으로 변환**
+  - **들여쓰기**
+  - **따옴표 형식** 등 다양한 포맷
+
+- **파일을 저장할 때마다 Prettier가 자동 실행되도록 설정**하면  
+  → 이런 작업들이 자동으로 수행됩니다.  
+  → 이것이 **가장 이상적인 설정**입니다.
+
+---
+
+#### 🔧 Prettier VS Code 익스텐션 설치 방법
+
+1. **VS Code 실행하기**  
+2. **Ctrl/Cmd + P** 눌러 **퀵오픈 사용**  
+3. 아래 명령 입력:  ext install esbenp.prettier-vscode
+
+---
+
+
+### 💾 저장 시점에 포매팅하기
+
+- 저장할 때마다 **코드가 자동 포매팅**되는 것이 가장 이상적입니다.  
+- 이러한 설정은 **VS Code 자체적으로 내장**되어 있습니다.
+
+---
+
+#### ✅ 설정 방법
+
+1. **VS Code에서 `Ctrl/Cmd + Shift + P`** 누르기  
+2. `"settings"`라고 입력  
+3. 엔터 누르기  
+4. 검색 창에서 `"format on save"`라고 입력  
+5. `"format on save"` 옵션이 **체크되어 있는지 확인**
+
+---
+
+### ⚠️ 충돌 방지 및 추가 팁
+
+- 만약 **ESLint 프리셋에 포매팅 규칙**이 있는 경우,  
+  → **Prettier와 충돌**을 일으킬 수 있습니다.
+
+- ESLint는 오직 **논리적 오류만 잡도록 설정**하고,  
+  → [`eslint-config-prettier`](https://github.com/prettier/eslint-config-prettier)를 사용해  
+  → ESLint 프리셋의 **모든 포매팅 규칙을 비활성화**하는 것을 권장합니다.
+
+- `pull request`가 머지되기 전에 코드 형식이 맞는지 확인하려면  
+  → 지속적인 통합(CI)을 위해 다음 명령 사용:  prettier --check
+
+  ---
+
+## 🧠 TypeScript 사용하기 (React 컴포넌트)
+
+- **JSX를 포함하고 있는 모든 파일은 `.tsx` 확장자**를 사용해야 합니다.
+
+- `.tsx`는 해당 파일이 JSX를 포함하고 있음을 TypeScript에게 알려주는  
+  → **전용 확장자**입니다.
+
+---
+
+- React와 함께 **TypeScript를 작성하는 것**은  
+  → React와 함께 **JavaScript를 작성하는 것과 매우 유사**합니다.
+
+- **가장 큰 차이점**은 컴포넌트의 `props`에  
+  → **타입을 명시할 수 있다는 점**입니다.
+
+- 이 타입 정보는 에디터에서:
+  - **정확성을 검사하고**
+  - **인라인 문서처럼 자동 제공되는 도구**로 활용됩니다.
+
+---
+
+> 빠르게 시작하고 싶다면 가이드에서 예시로 등장하는  
+> `MyButton` 컴포넌트를 참고하세요.  
+> `title` 같은 props에 타입을 선언하는 방법이 소개되어 있습니다.
+- 이러한 타입은 에디터에서 **정확성을 검사**하고,  
+  → **인라인 문서**로도 제공되어 개발 시 유용하게 사용됩니다.
+
+- 빠르게 시작하기 가이드에서는  
+  `MyButton` 컴포넌트를 예로 들어  
+  → **버튼의 `title`을 설명하는 타입을 추가**하는 방법을 소개합니다.
+
+---
+
+## 🔧 App.tsx 예제: TypeScript 컴포넌트 사용하기
+
+- `App.tsx`를 새로 만들고 `App.js`에서 이를 불러오도록 수정합니다.
+
+---
+
+### 📄 `MyApp.tsx`
+
+```tsx
+function MyButton({ title }: { title: string }) {
+  return (
+    <button>{title}</button>
+  );
+}
+
+export default function MyApp() {
+  return (
+    <div>
+      <h1>Welcome to my app</h1>
+      <MyButton title="I'm a button" />
+    </div>
+  );
+}
+```
+
+```js
+import MyApp from './MyApp.tsx';
+import './App.css';
+
+export default function App() {
+  return (
+    <div className="App">
+      <header className="App-header">
+        Hello, Chapter06!
+        <MyApp />
+      </header>
+    </div>
+  );
+}
+```
+
+이 문서에 포함된 샌드박스는 TypeScript 코드를 작성할 수 있지만,
+→ 타입 검사는 수행되지 않습니다.
+
+즉, TypeScript 샌드박스를 수정해 학습할 수는 있지만
+→ 타입 오류나 경고는 표시되지 않을 수 있으니 참고하세요.
+
+---
+
+### 🔁 TypeScript와 함께 Hooks 사용하기
+
+- `@types/react`의 타입 정의에는 **내장 Hooks에 대한 타입이 포함**되어 있으므로  
+  → **추가 설정 없이 컴포넌트에 사용할 수 있습니다.**
+
+- 이 타입 정의는 **작성된 컴포넌트 코드를 기반으로 타입을 추론**하기 때문에,  
+  대부분의 경우 **추가적인 타입 선언 없이도 타입을 정확히 유추**할 수 있습니다.
+
+---
+
+### 📌 Hooks에 타입을 제공하는 방법 - `useState` 예시
+
+- `useState` 훅은 **초기 state로 전달된 값**을 기준으로  
+  → **타입을 자동 추론**합니다.
+
+```ts
+const [enabled, setEnabled] = useState(false);
+```
+
+위 예제에서:
+
+enabled는 boolean 타입
+
+setEnabled는 boolean 값을 설정하는 함수
+
+---
+
 # 5월 29일 강의내용
-(내용 축약)
+(내용 축약)       
 📌 애플리케이션 최적화화,
 
 🚀 애플리케이션 성능 개선,
